@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\APIs\Steam\steam.h" />
     <ClInclude Include="src\framework.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\res\imgui\imgui_impl_dx11.h" />
@@ -150,6 +151,51 @@
     <ClInclude Include="src\res\imgui\imstb_textedit.h" />
     <ClInclude Include="src\res\imgui\imstb_truetype.h" />
     <ClInclude Include="src\res\MinHook\MinHook.h" />
+    <ClInclude Include="src\res\steam\include\isteamapplist.h" />
+    <ClInclude Include="src\res\steam\include\isteamapps.h" />
+    <ClInclude Include="src\res\steam\include\isteamappticket.h" />
+    <ClInclude Include="src\res\steam\include\isteamclient.h" />
+    <ClInclude Include="src\res\steam\include\isteamcontroller.h" />
+    <ClInclude Include="src\res\steam\include\isteamdualsense.h" />
+    <ClInclude Include="src\res\steam\include\isteamfriends.h" />
+    <ClInclude Include="src\res\steam\include\isteamgamecoordinator.h" />
+    <ClInclude Include="src\res\steam\include\isteamgameserver.h" />
+    <ClInclude Include="src\res\steam\include\isteamgameserverstats.h" />
+    <ClInclude Include="src\res\steam\include\isteamhtmlsurface.h" />
+    <ClInclude Include="src\res\steam\include\isteamhttp.h" />
+    <ClInclude Include="src\res\steam\include\isteaminput.h" />
+    <ClInclude Include="src\res\steam\include\isteaminventory.h" />
+    <ClInclude Include="src\res\steam\include\isteammatchmaking.h" />
+    <ClInclude Include="src\res\steam\include\isteammusic.h" />
+    <ClInclude Include="src\res\steam\include\isteammusicremote.h" />
+    <ClInclude Include="src\res\steam\include\isteamnetworking.h" />
+    <ClInclude Include="src\res\steam\include\isteamnetworkingmessages.h" />
+    <ClInclude Include="src\res\steam\include\isteamnetworkingsockets.h" />
+    <ClInclude Include="src\res\steam\include\isteamnetworkingutils.h" />
+    <ClInclude Include="src\res\steam\include\isteamparentalsettings.h" />
+    <ClInclude Include="src\res\steam\include\isteamps3overlayrenderer.h" />
+    <ClInclude Include="src\res\steam\include\isteamremoteplay.h" />
+    <ClInclude Include="src\res\steam\include\isteamremotestorage.h" />
+    <ClInclude Include="src\res\steam\include\isteamscreenshots.h" />
+    <ClInclude Include="src\res\steam\include\isteamugc.h" />
+    <ClInclude Include="src\res\steam\include\isteamuser.h" />
+    <ClInclude Include="src\res\steam\include\isteamuserstats.h" />
+    <ClInclude Include="src\res\steam\include\isteamutils.h" />
+    <ClInclude Include="src\res\steam\include\isteamvideo.h" />
+    <ClInclude Include="src\res\steam\include\matchmakingtypes.h" />
+    <ClInclude Include="src\res\steam\include\steamclientpublic.h" />
+    <ClInclude Include="src\res\steam\include\steamencryptedappticket.h" />
+    <ClInclude Include="src\res\steam\include\steamhttpenums.h" />
+    <ClInclude Include="src\res\steam\include\steamnetworkingfakeip.h" />
+    <ClInclude Include="src\res\steam\include\steamnetworkingtypes.h" />
+    <ClInclude Include="src\res\steam\include\steamps3params.h" />
+    <ClInclude Include="src\res\steam\include\steamtypes.h" />
+    <ClInclude Include="src\res\steam\include\steamuniverse.h" />
+    <ClInclude Include="src\res\steam\include\steam_api.h" />
+    <ClInclude Include="src\res\steam\include\steam_api_common.h" />
+    <ClInclude Include="src\res\steam\include\steam_api_flat.h" />
+    <ClInclude Include="src\res\steam\include\steam_api_internal.h" />
+    <ClInclude Include="src\res\steam\include\steam_gameserver.h" />
     <ClInclude Include="src\Test.h" />
     <ClInclude Include="src\UI.h" />
   </ItemGroup>
@@ -176,9 +222,11 @@
     <None Include="src\res\imgui\.editorconfig" />
     <None Include="src\res\imgui\.gitattributes" />
     <None Include="src\res\imgui\.gitignore" />
+    <None Include="src\res\steam\include\steam_api.json" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="src\res\MinHook\libMinHook.x64.lib" />
+    <Library Include="src\res\steam\lib\steam_api64.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

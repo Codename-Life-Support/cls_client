@@ -54,6 +54,144 @@
     <ClInclude Include="src\Test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamapplist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamapps.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamappticket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamclient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamcontroller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamdualsense.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamfriends.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamgamecoordinator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamgameserver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamgameserverstats.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamhtmlsurface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamhttp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteaminput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteaminventory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteammatchmaking.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteammusic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteammusicremote.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamnetworking.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamnetworkingmessages.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamnetworkingsockets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamnetworkingutils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamparentalsettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamps3overlayrenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamremoteplay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamremotestorage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamscreenshots.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamugc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamuser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamuserstats.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamutils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\isteamvideo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\matchmakingtypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\steam_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\steam_api_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\steam_api_flat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\steam_api_internal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\steam_gameserver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\steamclientpublic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\steamencryptedappticket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\steamhttpenums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\steamnetworkingfakeip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\steamnetworkingtypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\steamps3params.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\steamtypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\steam\include\steamuniverse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Steam\steam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\dllmain.cpp">
@@ -91,8 +229,10 @@
     <None Include="src\res\imgui\.editorconfig" />
     <None Include="src\res\imgui\.gitattributes" />
     <None Include="src\res\imgui\.gitignore" />
+    <None Include="src\res\steam\include\steam_api.json" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="src\res\MinHook\libMinHook.x64.lib" />
+    <Library Include="src\res\steam\lib\steam_api64.lib" />
   </ItemGroup>
 </Project>

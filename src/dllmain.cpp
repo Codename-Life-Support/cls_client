@@ -1,4 +1,6 @@
 #include "pch.h"
+#define _CRT_SECURE_NO_WARNINGS 
+#pragma warning(disable : 4996)
 
 #include <d3d11_1.h>
 #pragma comment(lib, "d3d11.lib")
@@ -17,10 +19,12 @@
 
 #include "res/MinHook/MinHook.h"
 #include <thread>
+#include <string>
 
 
 using namespace DirectX;
 using namespace std;
+#include "APIs/Steam/steam.h"
 #include "UI.h"
 #include "Test.h"
 
@@ -119,8 +123,10 @@ void init_graphics(IDXGISwapChain* swap_chain) {
 
     InitObjRender(swap_chain, dx_device, target_hwnd);
     init_imgui(dx_device, dx_device_context, target_hwnd);
+    
 
-    MessageBoxA(0, "[CLS-CLIENT] graphics init", "INIT DEBUG", 0);
+
+    MessageBoxA(0, "[CLS-CLIENT] new graphics init", "INIT DEBUG", 0);
 }
 
 
@@ -184,6 +190,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
     case DLL_PROCESS_DETACH: break;
     case DLL_PROCESS_ATTACH:
         hook_main();
+        InjectedSteamInit();
         std::thread(injected_window_main).detach();
         break;
     }
