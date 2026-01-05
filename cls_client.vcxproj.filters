@@ -192,6 +192,9 @@
     <ClInclude Include="src\APIs\Steam\steam.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\APIs\MCC\mcctemp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\dllmain.cpp">
@@ -234,5 +237,10 @@
   <ItemGroup>
     <Library Include="src\res\MinHook\libMinHook.x64.lib" />
     <Library Include="src\res\steam\lib\steam_api64.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="src\res\MinHook\extension.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

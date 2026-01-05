@@ -24,6 +24,7 @@
 
 using namespace DirectX;
 using namespace std;
+#include "APIs/MCC/mcctemp.h"
 #include "APIs/Steam/steam.h"
 #include "UI.h"
 #include "Test.h"
@@ -74,8 +75,16 @@ HRESULT  DLLRun(IDXGISwapChain* swap_chain, UINT SyncInterval, UINT Flags) {
     return send_func_ptr(swap_chain, SyncInterval, Flags);
 }
 
+typedef HRESULT(player_content_check)();
 
+extern "C" player_content_check* player_content_check_ptr;
+extern "C" void ReportPlayersHaveContent(uint32_t* bitmask_ptr);
 
+player_content_check* player_content_check_ptr = NULL;
+void ReportPlayersHaveContent(uint32_t* bitmask_ptr) {
+    evil_players = *bitmask_ptr;
+}
+extern "C" void AsmDetour0();
 
 
 
@@ -180,6 +189,32 @@ bool hook_main() {
         MessageBoxA(0, "[CLS-CLIENT] could not enable hook at IDXGISwapChain::Present -> dxgi.h", "DirectX hook failure", 0);
         return false;
     }
+
+
+    HMODULE networkshipping_module = GetModuleHandleA("halonetworklayer_ship.dll");
+    if (!networkshipping_module) {
+        MessageBoxA(0, "[CLS-CLIENT] could not get a reference to halonetworklayer_ship.dll", "Network hook failure", 0);
+        return false;
+    }
+    player_list = (PlayerList*)((long long)(networkshipping_module) + 0x197E78);
+
+    HMODULE exeModule = GetModuleHandle(nullptr);
+    if (!exeModule) {
+        MessageBoxA(0, "[CLS-CLIENT] could not get a reference to halonetworklayer_ship.dll", "Network hook failure", 0);
+        return false;
+    }
+    char* content_check_address = (char*)exeModule + 0x25157B;
+    if (MH_CreateHook(content_check_address, &AsmDetour0, (void**)(&player_content_check_ptr)) != MH_OK) {
+        MessageBoxA(0, "[CLS-CLIENT] could not set hook at MCC checkplayercontent", "MCC hook failure", 0);
+        return false;
+    }
+    if (MH_EnableHook(content_check_address) != MH_OK) {
+        MessageBoxA(0, "[CLS-CLIENT] could not enable hook at MCC checkplayercontent", "DirectX hook failure", 0);
+        return false;
+    }
+
+
+
     return true;
 }
 void injected_window_main() {while (true) {Sleep(30000);}} // keep thread open forever??? possibly redundant?

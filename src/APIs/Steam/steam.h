@@ -32,7 +32,7 @@ DWORD WINAPI SteamLoop(LPVOID lpParam){
 
 		steam_userid = uid.ConvertToUint64();
 		steam_lobbyid = friend_game_info.m_steamIDLobby.ConvertToUint64();
-		MessageBoxA(0, "testing", "DirectX hook failure", 0);
+		//MessageBoxA(0, "testing", "DirectX hook failure", 0);
 	}
 	return 0;
 }
