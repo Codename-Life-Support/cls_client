@@ -23,7 +23,7 @@ struct PlayerInfo{
     wchar_t serviceId[4];    // 0x84
     wchar_t clanTag[16];     // 0x8C
     unsigned char flags[7];  // 0xAC
-    char Guid[17];     // 0xB3
+    char guid[17];           // 0xB3
     uint32_t unkC4;          // 0xC4
     uint64_t unkC8;          // 0xC8
     wchar_t gamertag1[16];   // 0xD0
@@ -34,6 +34,41 @@ struct PlayerList {
     uint64_t player_bitmask; // bits are checked to indicate which indicies are valid
     PlayerInfo players[16];
 };
-uint64_t evil_players = 0;
-PlayerList* player_list = nullptr;
 #pragma pack(pop)
+
+int last_start_game_ack = 0;
+int start_game_ack_number = 0;
+uint64_t evil_players = 0;
+void** lobby_info = nullptr;
+
+bool GetStartAck(uint64_t* players_mask) {
+    if (!players_mask) return false;
+
+    if (last_start_game_ack != start_game_ack_number) {
+        last_start_game_ack = start_game_ack_number;
+        *players_mask = evil_players;
+        return true;
+    }
+    return false;
+}
+
+
+PlayerList* GetPlayersList() {
+    // not sure why it can be -0x30, MCCs code just has a check for this
+    if (lobby_info != 0 && *lobby_info != 0 && (long)*lobby_info != -0x30) {
+        return (PlayerList*)(((char*)*lobby_info) + 0x1D18);
+    }
+    return 0;
+}
+
+
+typedef HRESULT(player_content_check)();
+extern "C" player_content_check* player_content_check_ptr;
+extern "C" void ReportPlayersHaveContent(uint32_t* bitmask_ptr);
+extern "C" void AsmDetour0();
+player_content_check* player_content_check_ptr = NULL;
+void ReportPlayersHaveContent(uint32_t* bitmask_ptr) {
+    // TODO: make thread safe
+    evil_players = *bitmask_ptr;
+    start_game_ack_number = start_game_ack_number + 1;
+}

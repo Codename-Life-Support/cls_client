@@ -15,12 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\framework.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\res\imgui\imgui_impl_dx11.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -48,10 +42,7 @@
     <ClInclude Include="src\res\MinHook\MinHook.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\UI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Test.h">
+    <ClInclude Include="src\APIs\Overlay\UIRun.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\res\steam\include\isteamapplist.h">
@@ -192,15 +183,153 @@
     <ClInclude Include="src\APIs\Steam\steam.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\APIs\MCC\mcctemp.h">
+    <ClInclude Include="src\APIs\MCC\PlayerList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Launcher\IPC\IPC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Launcher\IPC\IPCShared.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Launcher\IPC\IPCUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Launcher\IPC\IPCChannel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\DirectX\DXInit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\APIInit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\MCC\hooks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\DirectX\DXRun.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\MCC\Inputs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Overlay\UIInit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Overlay\Widgets\_Debug\UITests.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Launcher\IPC\LauncherIPC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\MCC\GameSession.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Overlay\Widgets\_Debug\DEBUG_MenuID.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\MCC\GameState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Overlay\Widgets\_Debug\DEBUG_GameState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Overlay\Widgets\_Debug\DEBUG_PlayerList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Overlay\Widgets\_Debug\DEBUG_SessionStruct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Overlay\Widgets\_Debug\DEBUG_HMLSession.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Overlay\Widgets\UI_MissingContentPopup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Overlay\Widgets\UI_ChangedPrivacyPopup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Overlay\Widgets\UI_Hotkeys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Launcher\FocusLauncher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Overlay\Widgets\UI_PublishedSessionManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Steam\WorkshopPath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe bingle\Downloads\json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Steam\UGCParse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Overlay\Widgets\_Debug\DEBUG_GameSession.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Utility\GuidUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Overlay\SessionManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\Server\Server.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\curl\include\curl\curl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\curl\curl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\curl\websockets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\curl\mprintf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\curl\multi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\curl\options.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\curl\stdcheaders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\curl\system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\curl\typecheck-gcc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\curl\urlapi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\curl\header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\curl\easy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\curl\curlver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\res\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\APIs\DirectX\DX_Textures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\dllmain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\res\imgui\imgui_impl_dx11.cpp">
@@ -233,14 +362,26 @@
     <None Include="src\res\imgui\.gitattributes" />
     <None Include="src\res\imgui\.gitignore" />
     <None Include="src\res\steam\include\steam_api.json" />
+    <None Include="src\res\curl\libcurl-x64.def">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\Deploy\libcurl-x64.dll" />
+    <None Include="src\res\curl\MyLibrary.exp" />
+    <None Include="src\Deploy\MinHook.x64.dll" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="src\res\MinHook\libMinHook.x64.lib" />
     <Library Include="src\res\steam\lib\steam_api64.lib" />
+    <Library Include="src\res\curl\libcurl-x64.lib" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="src\res\MinHook\extension.asm">
       <Filter>Source Files</Filter>
     </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\Deploy\halmods.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
