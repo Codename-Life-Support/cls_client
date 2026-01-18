@@ -155,6 +155,7 @@
     <ClInclude Include="src\APIs\Launcher\IPC\IPC.h" />
     <ClInclude Include="src\APIs\Launcher\IPC\IPCChannel.h" />
     <ClInclude Include="src\APIs\Launcher\IPC\IPCShared.h" />
+    <ClInclude Include="src\APIs\Launcher\IPC\IPCSharedEnums.h" />
     <ClInclude Include="src\APIs\Launcher\IPC\IPCUtility.h" />
     <ClInclude Include="src\APIs\Launcher\IPC\LauncherIPC.h" />
     <ClInclude Include="src\APIs\Launcher\FocusLauncher.h" />

@@ -1,12 +1,13 @@
 #pragma once
 
-
+bool recache_host_info_for_IPC = false;
 
 // our current session ID
 uint64_t hosted_session_id = 0;
 uint64_t hosted_session_secret = 0;
 int hosted_session_max_players = -1;
 
+string last_lobby_name;
 // cached items that need to be routinely checked to see if our session needs an update
 GameSessionInfo last_game_info = {};
 string last_map_name;
@@ -62,6 +63,7 @@ void UpdateSessionLoop(const char** error_ptr, const char** error_context_ptr) {
 					hosted_session_id = 0;
 					hosted_session_secret = 0;
 					hosted_session_max_players = -1;
+					recache_host_info_for_IPC = true;
 					*error_context_ptr = "routine server update error, our server has been forcibly closed.";
 				} 
 				else {
@@ -74,6 +76,7 @@ void UpdateSessionLoop(const char** error_ptr, const char** error_context_ptr) {
 				last_map_name = current_request_map_name;
 				last_steamlobby_id = current_request_steamlobby_id;
 				last_player_count = current_request_player_count;
+				recache_host_info_for_IPC = true;
 			}
 			break;
 		}
@@ -97,6 +100,7 @@ void UpdateSessionLoop(const char** error_ptr, const char** error_context_ptr) {
 				hosted_session_id = 0;
 				hosted_session_secret = 0;
 				hosted_session_max_players = -1;
+				recache_host_info_for_IPC = true;
 			}
 			break;
 		}
@@ -114,6 +118,7 @@ void UpdateSessionLoop(const char** error_ptr, const char** error_context_ptr) {
 					std::string right = result.substr(pos + 1);
 					hosted_session_id = std::stoull(left, nullptr, 16);
 					hosted_session_secret = std::stoull(right, nullptr, 16);
+					recache_host_info_for_IPC = true;
 					*error_context_ptr = "Successfully published session !!!!";
 					*error_ptr = "request returned and gave us our correctly formatted ID & secret";
 				}
@@ -129,7 +134,7 @@ void UpdateSessionLoop(const char** error_ptr, const char** error_context_ptr) {
 		last_routine_request.release();
 	}
 
-	if (attempting_shutdown || !hosted_session_id || !hosted_session_secret || !steam_userid || !steam_lobbyid) {
+	if (attempting_shutdown || !steam_userid || !steam_lobbyid) {
 		return;
 	}
 	auto now = std::chrono::steady_clock::now();
@@ -137,57 +142,67 @@ void UpdateSessionLoop(const char** error_ptr, const char** error_context_ptr) {
 		return;
 	}
 
-
 	last_session_update = now;
 	uint64_t current_steamlobby_id = steam_lobbyid;
 	GameSessionInfo current_game_info = GetSessionDetails();
 
-	// open Json
-	json j;
-	j["id"] = std::to_string(hosted_session_id);
-	j["secret"] = std::to_string(hosted_session_secret);
-	if (current_game_info.gametype_category != last_game_info.gametype_category || current_game_info.type != last_game_info.type) {
-		j["game_mode"] = PrintGametype(current_game_info.gametype_category, current_game_info.type);
-	}
-	if (current_game_info.gamevar_name != last_game_info.gamevar_name) {
-		j["game_variant"] = current_game_info.gamevar_name;
-	}
-	if (current_game_info.mod_name != last_game_info.mod_name) {
-		j["mod_name"] = current_game_info.mod_name;
-	}
-	if (current_game_info.game != last_game_info.game) {
-		j["mod_game_engine"] = PrintHaloGame(current_game_info.game);
-	}
-	if (current_game_info.workshop_id != last_game_info.workshop_id) {
-		j["mod_workshop_id"] = std::to_string(current_game_info.workshop_id);
-	}
 	int current_players = 0;
 	PlayerList* player_list = GetPlayersList();
 	if (player_list) {
 		current_players = player_list->player_count;
 	}
-	if (current_players != last_player_count) {
-		j["current_players"] = std::to_string(current_players);
-	}
 	string current_map_name = current_game_info.mapvar_name;
 	if (current_map_name.empty()) {
 		current_map_name = current_game_info.map_name;
 	}
-	if (current_map_name != last_game_info.mapvar_name) {
-		j["map_variant"] = current_map_name;
-	}
 
-	if (current_steamlobby_id != last_steamlobby_id) {
-		j["steam_lobbyid"] = current_steamlobby_id;
+	// if we're not hosting then we just want the current game details to pass to the launcher
+	if (!IsHosting()) {
+		last_game_info = current_game_info;
+		last_map_name = current_map_name;
+		last_steamlobby_id = current_steamlobby_id;
+		last_player_count = current_players;
+		recache_host_info_for_IPC = true;
 	}
+	else {
+		// open Json
+		json j;
+		j["id"] = std::to_string(hosted_session_id);
+		j["secret"] = std::to_string(hosted_session_secret);
+		if (current_game_info.gametype_category != last_game_info.gametype_category || current_game_info.type != last_game_info.type) {
+			j["game_mode"] = PrintGametype(current_game_info.gametype_category, current_game_info.type);
+		}
+		if (current_game_info.gamevar_name != last_game_info.gamevar_name) {
+			j["game_variant"] = current_game_info.gamevar_name;
+		}
+		if (current_game_info.mod_name != last_game_info.mod_name) {
+			j["mod_name"] = current_game_info.mod_name;
+		}
+		if (current_game_info.game != last_game_info.game) {
+			j["mod_game_engine"] = PrintHaloGame(current_game_info.game);
+		}
+		if (current_game_info.workshop_id != last_game_info.workshop_id) {
+			j["mod_workshop_id"] = std::to_string(current_game_info.workshop_id);
+		}
+		if (current_players != last_player_count) {
+			j["current_players"] = std::to_string(current_players);
+		}
+		if (current_map_name != last_game_info.mapvar_name) {
+			j["map_variant"] = current_map_name;
+		}
+
+		if (current_steamlobby_id != last_steamlobby_id) {
+			j["steam_lobbyid"] = current_steamlobby_id;
+		}
 	
-	last_request_type = req_routine;
-	last_routine_request = std::make_unique<HttpRequest>(server_update_url, j.dump());
+		last_request_type = req_routine;
+		last_routine_request = std::make_unique<HttpRequest>(server_update_url, j.dump());
 
-	current_request_game_info = current_game_info;
-	current_request_map_name = current_map_name;
-	current_request_steamlobby_id = current_steamlobby_id;
-	current_request_player_count = current_players;
+		current_request_game_info = current_game_info;
+		current_request_map_name = current_map_name;
+		current_request_steamlobby_id = current_steamlobby_id;
+		current_request_player_count = current_players;
+	}
 }
 
 
@@ -211,10 +226,11 @@ void PublishSession(char* _session_name_buffer, char* _session_desc_buffer, int 
 	last_steamlobby_id = steam_lobbyid;
 	last_game_info = GetSessionDetails();
 
+	last_lobby_name = string(_session_name_buffer);
 
 	json j;
 
-	j["name"] = string(_session_name_buffer);
+	j["name"] = last_lobby_name;
 	j["description"] = string(_session_desc_buffer);
 	j["max_players"] = std::to_string(hosted_session_max_players);
 	j["mods"] = modStrings;
@@ -252,6 +268,7 @@ bool ManualSessionUpdate(char* _session_name_buffer, char* _session_desc_buffer,
 	}
 	// static stuff that we have to intentionally change
 	hosted_session_max_players = _max_players;
+	last_lobby_name = string(_session_name_buffer);
 
 	std::vector<std::string> modStrings;
 	modStrings.reserve(_selected_mods.size());
@@ -263,7 +280,7 @@ bool ManualSessionUpdate(char* _session_name_buffer, char* _session_desc_buffer,
 	json j;
 	j["id"] = std::to_string(hosted_session_id);
 	j["secret"] = std::to_string(hosted_session_secret);
-	j["name"] = string(_session_name_buffer);
+	j["name"] = last_lobby_name;
 	j["description"] = string(_session_desc_buffer);
 	j["max_players"] = std::to_string(hosted_session_max_players);
 	j["mods"] = modStrings;
@@ -283,6 +300,7 @@ bool EndSession() {
 	j["secret"] = std::to_string(hosted_session_secret);
 
 	// add it to the thingo list
+	attempting_shutdown = true;
 	last_request_type = req_shutdown;
 	last_routine_request = std::make_unique<HttpRequest>(server_shutdown_url, j.dump());
 	return true;

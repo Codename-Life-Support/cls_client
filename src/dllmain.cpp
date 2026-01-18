@@ -49,6 +49,7 @@ using namespace std;
 #include "APIs/Steam/WorkshopPath.h"
 #include "APIs/MCC/PlayerList.h"
 #include "APIs/MCC/GameState.h"
+#include "APIs/Launcher/IPC/IPCSharedEnums.h"
 #include "APIs/MCC/GameSession.h"
 
 #include "APIs/Overlay/SessionManager.h"

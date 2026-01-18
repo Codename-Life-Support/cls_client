@@ -327,6 +327,9 @@
     <ClInclude Include="src\APIs\DirectX\DX_Textures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\APIs\Launcher\IPC\IPCSharedEnums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\dllmain.cpp">
