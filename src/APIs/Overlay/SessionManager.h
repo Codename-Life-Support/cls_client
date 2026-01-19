@@ -40,9 +40,18 @@ bool IsHosting() {
 	return (hosted_session_id && hosted_session_secret);
 }
 
+void ClearHostingInfo() {
+
+	hosted_session_id = 0;
+	hosted_session_secret = 0;
+	hosted_session_max_players = -1;
+	recache_host_info_for_IPC = true;
+}
+int routine_fail_count = 0;
+
 // TODO: put this on another thread or something, who knows
 auto last_session_update = std::chrono::steady_clock::now();
-void UpdateSessionLoop(const char** error_ptr, const char** error_context_ptr) {
+void UpdateSessionLoop(string& error_ptr, string& error_context_ptr) {
 
 	// if we have a request waiting, lets try to complete it
 	HttpRequest* _last_request = last_routine_request.get();
@@ -51,90 +60,105 @@ void UpdateSessionLoop(const char** error_ptr, const char** error_context_ptr) {
 			MessageBoxA(0, "Failed waiting for result", "epic fial", MB_OK);
 			return;
 		}
-
-		const char* error_msg = _last_request->GetResultError();
-		switch (last_request_type) {
-		case req_routine: {
-			if (error_msg) {
-				*error_ptr = error_msg;
-				// TODO: implement some sort of response to enable this functionality if its ever needed
-				bool server_closed = false;
-				if (server_closed) {
-					hosted_session_id = 0;
-					hosted_session_secret = 0;
-					hosted_session_max_players = -1;
-					recache_host_info_for_IPC = true;
-					*error_context_ptr = "routine server update error, our server has been forcibly closed.";
-				} 
-				else {
-					*error_context_ptr = "routine server update error";
-				}
+		long result_code = _last_request->GetResultCode();
+		if (result_code == 0) {
+			switch (last_request_type) {
+			case req_routine: {
+				error_context_ptr = "curl routine server update error";
+				break;
 			}
-			else {
-				// success!!!! register all changes to our diffing system
-				last_game_info = current_request_game_info;
-				last_map_name = current_request_map_name;
-				last_steamlobby_id = current_request_steamlobby_id;
-				last_player_count = current_request_player_count;
-				recache_host_info_for_IPC = true;
+			case req_manual_update: {
+				error_context_ptr = "curl manual server update error";
+				break;
 			}
-			break;
+			case req_shutdown: {
+				error_context_ptr = "curl shutdown server error";
+				break;
+			}
+			case req_publish: {
+				error_context_ptr = "curl publish server error";
+				break;
+			}
+			}
+			error_ptr = _last_request->GetResultError();
 		}
-		case req_manual_update: {
-			if (error_msg) {
-				*error_context_ptr = "manual server update error";
-				*error_ptr = error_msg;
-			}
-			else {
-				// success!!!! (nothing to do)
-			}
-			break;
-		}
-		case req_shutdown: {
-			if (error_msg) {
-				*error_context_ptr = "shutdown server request error";
-				*error_ptr = error_msg;
-			}
-			else {
-				// success!!!! clear session details so we can start another one
-				hosted_session_id = 0;
-				hosted_session_secret = 0;
-				hosted_session_max_players = -1;
-				recache_host_info_for_IPC = true;
-			}
-			break;
-		}
-		case req_publish: {
-			auto result = _last_request->GetResult();
-			if (!error_msg) {
-				// process response
-				size_t pos = result.find('\\');
-				if (pos == std::string::npos) {
-					*error_context_ptr = "had error publishing session";
-					*error_ptr = "Malformed response recieved, could not delimit recieved ID & secret";
+		else {
+			bool did_error = (result_code != 200);
+			switch (last_request_type) {
+			case req_routine: {
+				if (did_error) {
+					error_ptr = _last_request->GetResult();
+					if (routine_fail_count > 4) {
+						ClearHostingInfo();
+						error_context_ptr = "routine server update error, abandoning connection";
+					} 
+					else {
+						error_context_ptr = "routine server update error";
+						routine_fail_count += 1;
+					}
 				}
 				else {
-					std::string left = result.substr(0, pos);
-					std::string right = result.substr(pos + 1);
-					hosted_session_id = std::stoull(left, nullptr, 16);
-					hosted_session_secret = std::stoull(right, nullptr, 16);
+					// success!!!! register all changes to our diffing system
+					last_game_info = current_request_game_info;
+					last_map_name = current_request_map_name;
+					last_steamlobby_id = current_request_steamlobby_id;
+					last_player_count = current_request_player_count;
 					recache_host_info_for_IPC = true;
-					*error_context_ptr = "Successfully published session !!!!";
-					*error_ptr = "request returned and gave us our correctly formatted ID & secret";
+					routine_fail_count = 0;
 				}
+				break;
 			}
-			else {
-				*error_context_ptr = "had error publishing session";
-				*error_ptr = error_msg;
+			case req_manual_update: {
+				if (did_error) {
+					error_context_ptr = "manual server update error";
+					error_ptr = _last_request->GetResult();
+				}
+				else {
+					// success!!!! (nothing to do)
+				}
+				break;
 			}
-			break;
-		}
+			case req_shutdown: {
+				if (did_error) {
+					error_context_ptr = "shutdown server request error";
+					error_ptr = _last_request->GetResult();
+				}
+				// we dont care if it errored or not, it'll expire on the server's end eventually
+				ClearHostingInfo();
+				break;
+			}
+			case req_publish: {
+				auto result = _last_request->GetResult();
+				if (!did_error) {
+					// process response
+					size_t pos = result.find('\\');
+					if (pos == std::string::npos) {
+						error_context_ptr = "had error publishing session";
+						error_ptr = "Malformed response recieved, could not delimit recieved ID & secret";
+					}
+					else {
+						std::string left = result.substr(0, pos);
+						std::string right = result.substr(pos + 1);
+						hosted_session_id = std::stoull(left, nullptr, 16);
+						hosted_session_secret = std::stoull(right, nullptr, 16);
+						recache_host_info_for_IPC = true;
+						error_context_ptr = "Successfully published session !!!!";
+						error_ptr = "request returned and gave us our correctly formatted ID & secret";
+					}
+				}
+				else {
+					error_context_ptr = "had error publishing session";
+					error_ptr = result.c_str();
+				}
+				break;
+			}
+			}
 		}
 		_last_request = nullptr;
 		last_routine_request.release();
 	}
 
-	if (attempting_shutdown || !steam_userid || !steam_lobbyid) {
+	if ((attempting_shutdown && IsHosting()) || !steam_userid || !steam_lobbyid) {
 		return;
 	}
 	auto now = std::chrono::steady_clock::now();
@@ -165,12 +189,13 @@ void UpdateSessionLoop(const char** error_ptr, const char** error_context_ptr) {
 		recache_host_info_for_IPC = true;
 	}
 	else {
+
 		// open Json
 		json j;
-		j["id"] = std::to_string(hosted_session_id);
-		j["secret"] = std::to_string(hosted_session_secret);
-		if (current_game_info.gametype_category != last_game_info.gametype_category || current_game_info.type != last_game_info.type) {
-			j["game_mode"] = PrintGametype(current_game_info.gametype_category, current_game_info.type);
+		j["id"] = to_hex16(hosted_session_id);
+		j["secret"] = to_hex16(hosted_session_secret);
+		if (current_game_info.gametype_category != last_game_info.gametype_category) {
+			j["game_mode"] = std::to_string((int)current_game_info.gametype_category);
 		}
 		if (current_game_info.gamevar_name != last_game_info.gamevar_name) {
 			j["game_variant"] = current_game_info.gamevar_name;
@@ -179,20 +204,20 @@ void UpdateSessionLoop(const char** error_ptr, const char** error_context_ptr) {
 			j["mod_name"] = current_game_info.mod_name;
 		}
 		if (current_game_info.game != last_game_info.game) {
-			j["mod_game_engine"] = PrintHaloGame(current_game_info.game);
+			j["mod_game_engine"] = std::to_string((int)current_game_info.game);
 		}
 		if (current_game_info.workshop_id != last_game_info.workshop_id) {
 			j["mod_workshop_id"] = std::to_string(current_game_info.workshop_id);
 		}
 		if (current_players != last_player_count) {
-			j["current_players"] = std::to_string(current_players);
+			j["player_count_current"] = std::to_string(current_players);
 		}
-		if (current_map_name != last_game_info.mapvar_name) {
+		if (current_map_name != last_map_name) {
 			j["map_variant"] = current_map_name;
 		}
 
 		if (current_steamlobby_id != last_steamlobby_id) {
-			j["steam_lobbyid"] = current_steamlobby_id;
+			j["steam_lobbyid"] = std::to_string(current_steamlobby_id);
 		}
 	
 		last_request_type = req_routine;
@@ -209,6 +234,7 @@ void UpdateSessionLoop(const char** error_ptr, const char** error_context_ptr) {
 
 void PublishSession(char* _session_name_buffer, char* _session_desc_buffer, int _max_players, const vector<uint64_t>& _selected_mods) {
 	attempting_shutdown = false;
+	routine_fail_count = 0;
 	last_session_update = std::chrono::steady_clock::now();
 	// if we're publishing, we have to disregard our prev tokens if we have any
 	hosted_session_id = 0;
@@ -232,10 +258,10 @@ void PublishSession(char* _session_name_buffer, char* _session_desc_buffer, int 
 
 	j["name"] = last_lobby_name;
 	j["description"] = string(_session_desc_buffer);
-	j["max_players"] = std::to_string(hosted_session_max_players);
+	j["player_count_max"] = std::to_string(hosted_session_max_players);
 	j["mods"] = modStrings;
 
-	j["game_mode"] = PrintGametype(last_game_info.gametype_category, last_game_info.type);
+	j["game_mode"] = std::to_string((int)last_game_info.gametype_category);
 	j["game_variant"] = last_game_info.gamevar_name;
 	j["mod_name"] = last_game_info.mod_name;
 	j["mod_game_engine"] = PrintHaloGame(last_game_info.game);
@@ -246,7 +272,7 @@ void PublishSession(char* _session_name_buffer, char* _session_desc_buffer, int 
 	if (player_list) {
 		last_player_count = player_list->player_count;
 	}
-	j["current_players"] = std::to_string(last_player_count);
+	j["player_count_current"] = std::to_string(last_player_count);
 
 	last_map_name = last_game_info.mapvar_name;
 	if (last_map_name.empty()) {
@@ -255,9 +281,8 @@ void PublishSession(char* _session_name_buffer, char* _session_desc_buffer, int 
 	j["map_variant"] = last_map_name;
 	
 
-
-	j["steam_lobbyid"] = last_steamlobby_id;
-	j["steam_id"] = steam_userid;
+	j["steam_lobbyid"] = std::to_string(last_steamlobby_id);
+	j["steam_id"] = std::to_string(steam_userid);
 
 	last_request_type = req_publish;
 	last_routine_request = std::make_unique<HttpRequest>(server_publish_url, j.dump());
@@ -278,11 +303,11 @@ bool ManualSessionUpdate(char* _session_name_buffer, char* _session_desc_buffer,
 	
 
 	json j;
-	j["id"] = std::to_string(hosted_session_id);
-	j["secret"] = std::to_string(hosted_session_secret);
+	j["id"] = to_hex16(hosted_session_id);
+	j["secret"] = to_hex16(hosted_session_secret);
 	j["name"] = last_lobby_name;
 	j["description"] = string(_session_desc_buffer);
-	j["max_players"] = std::to_string(hosted_session_max_players);
+	j["player_count_max"] = std::to_string(hosted_session_max_players);
 	j["mods"] = modStrings;
 
 	last_request_type = req_manual_update;
@@ -296,8 +321,8 @@ bool EndSession() {
 	}
 
 	json j;
-	j["id"] = std::to_string(hosted_session_id);
-	j["secret"] = std::to_string(hosted_session_secret);
+	j["id"] = to_hex16(hosted_session_id);
+	j["secret"] = to_hex16(hosted_session_secret);
 
 	// add it to the thingo list
 	attempting_shutdown = true;

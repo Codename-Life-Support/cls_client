@@ -19,7 +19,7 @@ bool GameState_GetIsIngame() {
 	return ((*IsInGame1 || *IsInGame2 || *IsInGame3) && !*IsLoadingBackToMenu);
 }
 bool GameState_IsInSomeMenu() {
-	return ((!*IsInGame1 || !*IsInGame2 || !*IsInGame3) || *IsPauseMenu);
+	return ((!*IsInGame1 || !*IsInGame2 || !*IsInGame3) || *IsPauseMenu || *IsLoading);
 }
 
 bool GameState_EnforceOpenPrivacy() {

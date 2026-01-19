@@ -105,7 +105,6 @@ GameSessionInfo GetSessionDetails() {
 	details.gamevar_name = "";
 	details.gametype_category = GameCategory_NONE;
 	if (!GameState_GetIsIngame()) {
-		MessageBoxA(0, "out of game report", "report status ", MB_OK);
 		return details;
 	}
 
@@ -127,7 +126,6 @@ GameSessionInfo GetSessionDetails() {
 		return details;
 	}
 
-	MessageBoxA(0, "in game report", "report status ", MB_OK);
 
 	mapvar_func_table** mapvar_struct = *(mapvar_func_table***)(session_struct_ptr + 0x2C080);
 	gametype_func_table** gametype_struct = *(gametype_func_table***)(session_struct_ptr + 0x2C088);
@@ -137,9 +135,6 @@ GameSessionInfo GetSessionDetails() {
 	details.game = (halo_game)*(int*)session_struct_ptr;
 
 	details.type = (map_type)(uint8_t)((*mapinfo_struct)->GetMapType)(mapinfo_struct);
-	if (details.type == campaign) {
-		details.gametype_category = GameCategory_Campaign;
-	}
 
 	char** mapname_ptr = (char**)((*mapinfo_struct)->GetDefaultMapName)(mapinfo_struct, output_buffer);
 	if (mapname_ptr && *mapname_ptr) {
@@ -198,6 +193,28 @@ GameSessionInfo GetSessionDetails() {
 		wchar_t* modename_ptr = (wchar_t*)((*gametype_struct)->GetModeName)(gametype_struct);
 		if (modename_ptr) {
 			details.gamevar_name = wchar_to_utf8(modename_ptr);
+		}
+	}
+
+	// fixup gametype category if its not right
+	if (details.gametype_category == GameCategory_NONE) {
+		switch (details.type) {
+		case campaign: {
+			details.gametype_category = GameCategory_Campaign;
+			break;
+		}
+		case multiplayer: {
+			details.gametype_category = GameCategory_NONE;
+			break;
+		}
+		case firefight: {
+			details.gametype_category = GameCategory_Firefight;
+			break;
+		}
+		default: {
+			details.gametype_category = GameCategory_NONE;
+			break;
+		}
 		}
 	}
 

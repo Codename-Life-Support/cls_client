@@ -38,7 +38,7 @@ void UI_ShowSessionManager(bool is_window_open) {
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0.3f));
         ImVec2 screen = ImGui::GetIO().DisplaySize;
         ImGui::SetNextWindowPos(ImVec2(screen.x * 0.5f, 30.0f), ImGuiCond_Always, ImVec2(0.5f, 0));
-        ImGui::SetNextWindowSize(ImVec2(400, 100));
+        ImGui::SetNextWindowSize(ImVec2(400, 50));
         ImGui::Begin("Session Request loading", 0, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoMove);
         ImGui::Text("Session request is loading...");
         ImGui::End();
@@ -107,7 +107,7 @@ void UI_ShowSessionManager(bool is_window_open) {
         ImGui::PushItemWidth(-1);
         // every time we open the mods menu, it should refresh the cached mods
         // this is so users can reasonably expect to access mods that installed since they last opened the menu
-        // realistically we do this because we're not going to setup a callback 
+        // realistically we do this because we're not going to setup a callback from steam to know when/if new mods get installed
         char buf[64];
         snprintf(buf, sizeof(buf), "Mods (%d)", count_selected);
         if (ImGui::Button(buf)) {
@@ -208,12 +208,12 @@ void UI_ShowSessionManager(bool is_window_open) {
 
 
 
-const char* last_routine_error = nullptr;
-const char* last_routine_error_context = nullptr;
+string last_routine_error;
+string last_routine_error_context;
 void UI_SessionPoll() {
-    UpdateSessionLoop(&last_routine_error, &last_routine_error_context);
+    UpdateSessionLoop(last_routine_error, last_routine_error_context);
 
-    if (last_routine_error) {
+    if (!last_routine_error.empty()) {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0.3f));
@@ -221,11 +221,11 @@ void UI_SessionPoll() {
         ImGui::SetNextWindowPos(ImVec2(screen.x * 0.5f, 90.0f), ImGuiCond_Always, ImVec2(0.5f, 0));
         ImGui::SetNextWindowSize(ImVec2(400, 100));
         ImGui::Begin("RoutineUpdateFail", 0, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove);
-        ImGui::Text("Routine session update has failed:");
-        ImGui::Text(last_routine_error_context);
-        ImGui::Text(last_routine_error);
+        ImGui::Text("Hosted session report:");
+        ImGui::Text(last_routine_error_context.c_str());
+        ImGui::Text(last_routine_error.c_str());
         if (ImGui::Button("OK")) {
-            last_routine_error = nullptr;
+            last_routine_error = "";
         }
         ImGui::End();
         ImGui::PopStyleColor();

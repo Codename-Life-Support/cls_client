@@ -23,12 +23,14 @@
 #include <map>
 #include <wrl/client.h>
 
+
 #include "res/MinHook/MinHook.h"
 #include <thread>
 #include <string>
 #include <locale>
 #include <codecvt>
 #include <sstream>
+#include <iomanip>
 
 #include "res/json.hpp"
 #include "res/curl/curl.h"

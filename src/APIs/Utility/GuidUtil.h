@@ -18,6 +18,13 @@ struct GuidEqual
 };
 
 
+string to_hex16(uint64_t v) {
+	std::ostringstream ss;
+	ss << std::hex << std::setw(16) << std::setfill('0') << std::nouppercase << v;
+	return ss.str();
+};
+
+
 
 std::string wchar_to_utf8(const std::wstring& wstr) {
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
