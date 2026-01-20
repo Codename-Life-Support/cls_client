@@ -31,6 +31,8 @@
 #include <codecvt>
 #include <sstream>
 #include <iomanip>
+#include <queue>
+#include <mutex>
 
 #include "res/json.hpp"
 #include "res/curl/curl.h"
@@ -41,6 +43,8 @@
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 using namespace std;
+#include "APIs/Overlay/OverlayLog.h"
+
 #include "APIs/DirectX/DX_Textures.h"
 
 #include "APIs/Utility/GuidUtil.h"
@@ -54,6 +58,7 @@ using namespace std;
 #include "APIs/Launcher/IPC/IPCSharedEnums.h"
 #include "APIs/MCC/GameSession.h"
 
+#include "APIs/Overlay/SessionManagerCache.h"
 #include "APIs/Overlay/SessionManager.h"
 
 #include "APIs/Launcher/FocusLauncher.h"

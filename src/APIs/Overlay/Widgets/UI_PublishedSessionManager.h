@@ -130,7 +130,7 @@ void UI_ShowSessionManager(bool is_window_open) {
         }
         ImGui::PopItemWidth();
         ImGui::SliderInt("Max Players", &max_players, 1, 16);
-
+        
         if (IsHosting()) {
             if (ImGui::Button("Update")) {
                 selected_mods = GetSelected();
@@ -138,11 +138,24 @@ void UI_ShowSessionManager(bool is_window_open) {
                 current_overlay_state = overlay_closed;
             }
         }
-        else if (ImGui::Button("Publish")) {
-            selected_mods = GetSelected();
-            PublishSession(session_name_buffer, session_desc_buffer, max_players, selected_mods);
-            current_overlay_state = overlay_closed;
+        else {
+            if (HasCachedCredentials()) {
+                if (ImGui::Button("Reconnect")) {
+                    selected_mods = GetSelected();
+                    ReconnectSession(session_name_buffer, session_desc_buffer, max_players, selected_mods);
+                    current_overlay_state = overlay_closed;
+                }
+                ImGui::SameLine();
+            }
+            if (ImGui::Button("Publish")) {
+                selected_mods = GetSelected();
+                PublishSession(session_name_buffer, session_desc_buffer, max_players, selected_mods);
+                current_overlay_state = overlay_closed;
+            }
         }
+            
+            
+            
         ImGui::SameLine();
         if (ImGui::Button("Close")) {
             current_overlay_state = overlay_closed;
@@ -208,12 +221,9 @@ void UI_ShowSessionManager(bool is_window_open) {
 
 
 
-string last_routine_error;
-string last_routine_error_context;
-void UI_SessionPoll() {
-    UpdateSessionLoop(last_routine_error, last_routine_error_context);
-
-    if (!last_routine_error.empty()) {
+void UI_ShowErrors() {
+    overlay_log loggy;
+    if (GetCurrentLog(loggy)) {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0.3f));
@@ -221,11 +231,11 @@ void UI_SessionPoll() {
         ImGui::SetNextWindowPos(ImVec2(screen.x * 0.5f, 90.0f), ImGuiCond_Always, ImVec2(0.5f, 0));
         ImGui::SetNextWindowSize(ImVec2(400, 100));
         ImGui::Begin("RoutineUpdateFail", 0, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove);
-        ImGui::Text("Hosted session report:");
-        ImGui::Text(last_routine_error_context.c_str());
-        ImGui::Text(last_routine_error.c_str());
+        ImGui::Text("Overlay Log %d/%d", loggy.index+1, GetLogCount());
+        ImGui::Text(loggy.context.c_str());
+        ImGui::Text(loggy.message.c_str());
         if (ImGui::Button("OK")) {
-            last_routine_error = "";
+            NextLog();
         }
         ImGui::End();
         ImGui::PopStyleColor();

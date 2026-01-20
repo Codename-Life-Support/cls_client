@@ -164,7 +164,9 @@
     <ClInclude Include="src\APIs\MCC\Inputs.h" />
     <ClInclude Include="src\APIs\MCC\PlayerList.h" />
     <ClInclude Include="src\APIs\APIInit.h" />
+    <ClInclude Include="src\APIs\Overlay\OverlayLog.h" />
     <ClInclude Include="src\APIs\Overlay\SessionManager.h" />
+    <ClInclude Include="src\APIs\Overlay\SessionManagerCache.h" />
     <ClInclude Include="src\APIs\Overlay\UIInit.h" />
     <ClInclude Include="src\APIs\Overlay\Widgets\UI_PublishedSessionManager.h" />
     <ClInclude Include="src\APIs\Overlay\Widgets\UI_ChangedPrivacyPopup.h" />

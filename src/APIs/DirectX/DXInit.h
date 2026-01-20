@@ -72,6 +72,7 @@ void DX_HookedInit(IDXGISwapChain* swap_chain) {
     Inputs_Init(target_hwnd);
     ReloadViewportStuff(swap_chain, dx_device, target_hwnd);
     DX_TexturesInit(dx_device, dx_device_context);
+    SessionManagerInit();
     UI_Init(dx_device, dx_device_context, target_hwnd);
 
 

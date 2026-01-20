@@ -28,7 +28,8 @@ enum request_type {
 	req_routine = 0,
 	req_shutdown = 1,
 	req_manual_update = 2,
-	req_publish = 3
+	req_publish = 3,
+	req_reconnect = 4
 };
 request_type last_request_type;
 std::unique_ptr<HttpRequest> last_routine_request;
@@ -39,61 +40,83 @@ bool IsRequesting() {
 bool IsHosting() {
 	return (hosted_session_id && hosted_session_secret);
 }
-
 void ClearHostingInfo() {
-
 	hosted_session_id = 0;
 	hosted_session_secret = 0;
 	hosted_session_max_players = -1;
 	recache_host_info_for_IPC = true;
 }
+
+string cached_sessionid;
+string cached_secret;
+bool has_cached_credentials = false;
+bool HasCachedCredentials() {
+	return has_cached_credentials;
+}
+void SessionManagerInit() {
+	has_cached_credentials = ReadSessionValues(cached_sessionid, cached_secret);
+	if (has_cached_credentials) {
+		PushLog("Reconnect available", "you may attempt to reconnect to regain control of the session you were previously hosting");
+	}
+}
+
+
+
 int routine_fail_count = 0;
 
 // TODO: put this on another thread or something, who knows
 auto last_session_update = std::chrono::steady_clock::now();
-void UpdateSessionLoop(string& error_ptr, string& error_context_ptr) {
+void UpdateSessionLoop() {
 
 	// if we have a request waiting, lets try to complete it
 	HttpRequest* _last_request = last_routine_request.get();
 	if (_last_request) {
 		if (!_last_request->HasResult()) {
-			MessageBoxA(0, "Failed waiting for result", "epic fial", MB_OK);
 			return;
 		}
 		long result_code = _last_request->GetResultCode();
 		if (result_code == 0) {
 			switch (last_request_type) {
 			case req_routine: {
-				error_context_ptr = "curl routine server update error";
+				if (routine_fail_count > 4) {
+					ClearHostingInfo();
+					PushLog("curl routine server update error, abandoning connection", _last_request->GetResult());
+				}
+				else {
+					PushLog("curl routine server update error", _last_request->GetResult());
+					routine_fail_count += 1;
+				}
 				break;
 			}
 			case req_manual_update: {
-				error_context_ptr = "curl manual server update error";
+				PushLog("curl manual server update error", _last_request->GetResult());
 				break;
 			}
 			case req_shutdown: {
-				error_context_ptr = "curl shutdown server error";
+				PushLog("curl shutdown server error", _last_request->GetResult());
 				break;
 			}
 			case req_publish: {
-				error_context_ptr = "curl publish server error";
+				PushLog("curl publish server error", _last_request->GetResult());
+				break;
+			}
+			case req_reconnect: {
+				PushLog("curl reconnect server error", _last_request->GetResult());
 				break;
 			}
 			}
-			error_ptr = _last_request->GetResultError();
 		}
 		else {
 			bool did_error = (result_code != 200);
 			switch (last_request_type) {
 			case req_routine: {
 				if (did_error) {
-					error_ptr = _last_request->GetResult();
 					if (routine_fail_count > 4) {
 						ClearHostingInfo();
-						error_context_ptr = "routine server update error, abandoning connection";
+						PushLog("routine server update error, abandoning connection", _last_request->GetResult());
 					} 
 					else {
-						error_context_ptr = "routine server update error";
+						PushLog("routine server update error", _last_request->GetResult());
 						routine_fail_count += 1;
 					}
 				}
@@ -110,18 +133,16 @@ void UpdateSessionLoop(string& error_ptr, string& error_context_ptr) {
 			}
 			case req_manual_update: {
 				if (did_error) {
-					error_context_ptr = "manual server update error";
-					error_ptr = _last_request->GetResult();
+					PushLog("manual server update error", _last_request->GetResult());
 				}
 				else {
-					// success!!!! (nothing to do)
+					PushLog("manual server update success", "successfully updated session info");
 				}
 				break;
 			}
 			case req_shutdown: {
 				if (did_error) {
-					error_context_ptr = "shutdown server request error";
-					error_ptr = _last_request->GetResult();
+					PushLog("shutdown server request error", _last_request->GetResult());
 				}
 				// we dont care if it errored or not, it'll expire on the server's end eventually
 				ClearHostingInfo();
@@ -133,22 +154,39 @@ void UpdateSessionLoop(string& error_ptr, string& error_context_ptr) {
 					// process response
 					size_t pos = result.find('\\');
 					if (pos == std::string::npos) {
-						error_context_ptr = "had error publishing session";
-						error_ptr = "Malformed response recieved, could not delimit recieved ID & secret";
+						PushLog("had error publishing session", "Malformed response recieved, could not delimit recieved ID & secret");
 					}
 					else {
 						std::string left = result.substr(0, pos);
 						std::string right = result.substr(pos + 1);
+
+						WriteSessionValues(left, right);
+						cached_sessionid = left;
+						cached_secret = right;
+						has_cached_credentials = true;
+
 						hosted_session_id = std::stoull(left, nullptr, 16);
 						hosted_session_secret = std::stoull(right, nullptr, 16);
 						recache_host_info_for_IPC = true;
-						error_context_ptr = "Successfully published session !!!!";
-						error_ptr = "request returned and gave us our correctly formatted ID & secret";
+						PushLog("Successfully published session !!!!", "request returned and gave us our correctly formatted ID & secret");
 					}
 				}
 				else {
-					error_context_ptr = "had error publishing session";
-					error_ptr = result.c_str();
+					PushLog("had error publishing session", result);
+				}
+				break;
+			}
+			case req_reconnect: {
+				auto result = _last_request->GetResult();
+				if (!did_error) {
+					hosted_session_id = std::stoull(cached_sessionid, nullptr, 16);
+					hosted_session_secret = std::stoull(cached_secret, nullptr, 16);
+					recache_host_info_for_IPC = true;
+					PushLog("Successfully reconnected to session !", "update request was accepted.");
+				}
+				else {
+					PushLog("had error reconnecting to session, try starting a new one.", result);
+					// TODO: only if error 404, clear cache (NOTE: 404 isn't currently implemented on the server's end)
 				}
 				break;
 			}
@@ -231,8 +269,7 @@ void UpdateSessionLoop(string& error_ptr, string& error_context_ptr) {
 }
 
 
-
-void PublishSession(char* _session_name_buffer, char* _session_desc_buffer, int _max_players, const vector<uint64_t>& _selected_mods) {
+json ParseSession(char* _session_name_buffer, char* _session_desc_buffer, int _max_players, const vector<uint64_t>& _selected_mods) {
 	attempting_shutdown = false;
 	routine_fail_count = 0;
 	last_session_update = std::chrono::steady_clock::now();
@@ -283,10 +320,23 @@ void PublishSession(char* _session_name_buffer, char* _session_desc_buffer, int 
 
 	j["steam_lobbyid"] = std::to_string(last_steamlobby_id);
 	j["steam_id"] = std::to_string(steam_userid);
-
+	
+	return j;
+}
+void PublishSession(char* _session_name_buffer, char* _session_desc_buffer, int _max_players, const vector<uint64_t>& _selected_mods) {
+	json j = ParseSession(_session_name_buffer, _session_desc_buffer, _max_players, _selected_mods);
 	last_request_type = req_publish;
 	last_routine_request = std::make_unique<HttpRequest>(server_publish_url, j.dump());
 }
+void ReconnectSession(char* _session_name_buffer, char* _session_desc_buffer, int _max_players, const vector<uint64_t>& _selected_mods) {
+	json j = ParseSession(_session_name_buffer, _session_desc_buffer, _max_players, _selected_mods);
+	// dont bother validating whether the strings contain the right data, if someone breaks the code flow then the server will tell them at least that they forgot to give credentials
+	j["id"] = cached_sessionid;
+	j["secret"] = cached_secret;
+	last_request_type = req_reconnect;
+	last_routine_request = std::make_unique<HttpRequest>(server_update_url, j.dump());
+}
+
 bool ManualSessionUpdate(char* _session_name_buffer, char* _session_desc_buffer, int _max_players, const vector<uint64_t>& _selected_mods) {
 	if (!hosted_session_id || !hosted_session_secret || IsRequesting()) {
 		return false;
