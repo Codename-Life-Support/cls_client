@@ -1,5 +1,5 @@
 
-#define _CRT_SECURE_NO_WARNINGS 
+#define _CRT_SECURE_NO_WARNINGS
 #pragma warning(disable : 4996)
 #define WIN32_LEAN_AND_MEAN
 
@@ -95,8 +95,12 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
     switch (ul_reason_for_call) {
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
-    case DLL_PROCESS_DETACH: break;
+        break;
+    case DLL_PROCESS_DETACH:
+        OverlayDLLShutdown();
+        break;
     case DLL_PROCESS_ATTACH:
+        DisableThreadLibraryCalls(hModule);
         OverlayDLLInit();
         break;
     }
