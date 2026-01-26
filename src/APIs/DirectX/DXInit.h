@@ -1,6 +1,5 @@
 #pragma once
 
-
 // callback related stuff
 HWND target_hwnd = 0;
 // directX info
@@ -10,7 +9,38 @@ IDXGISwapChain* last_swap_chain = nullptr;
 
 // other stuff
 bool needs_reloading = true;
-ID3D11RenderTargetView* d3d11RenderTargetView;
+ID3D11RenderTargetView* d3d11RenderTargetView = nullptr;
+
+void ReleaseOverlayResources() {
+    if (d3d11RenderTargetView) {
+        d3d11RenderTargetView->Release();
+        d3d11RenderTargetView = nullptr;
+    }
+    needs_reloading = true;
+}
+
+// ResizeBuffers hook stuff
+typedef HRESULT(STDMETHODCALLTYPE* ResizeBuffers_t)(IDXGISwapChain*, UINT, UINT, UINT, DXGI_FORMAT, UINT);
+static ResizeBuffers_t g_originalResizeBuffers = nullptr;
+static bool g_resizeBuffersHooked = false;
+
+HRESULT STDMETHODCALLTYPE HookedResizeBuffers(IDXGISwapChain* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags) {
+    ReleaseOverlayResources();
+    return g_originalResizeBuffers(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
+}
+
+void HookResizeBuffers(IDXGISwapChain* swap_chain) {
+    if (g_resizeBuffersHooked) return;
+
+    void** vtable = *reinterpret_cast<void***>(swap_chain);
+    void* resizeBuffersAddr = vtable[13]; // ResizeBuffers is at index 13
+
+    if (MH_CreateHook(resizeBuffersAddr, &HookedResizeBuffers, (void**)&g_originalResizeBuffers) == MH_OK) {
+        if (MH_EnableHook(resizeBuffersAddr) == MH_OK) {
+            g_resizeBuffersHooked = true;
+        }
+    }
+}
 
 bool ReloadViewportStuff(IDXGISwapChain* swap_chain, ID3D11Device1* dx_device, HWND hwnd) {
     if (d3d11RenderTargetView) d3d11RenderTargetView->Release();
@@ -36,6 +66,9 @@ void DX_HookedInit(IDXGISwapChain* swap_chain) {
     last_swap_chain = swap_chain;
     dx_device = 0;
     dx_device_context = (ID3D11DeviceContext1*)1; // make this thing have a value
+
+    // Hook ResizeBuffers using vtable
+    HookResizeBuffers(swap_chain);
 
     // config the target widnow & set windows event hook
     DXGI_SWAP_CHAIN_DESC swapChainDesc;
